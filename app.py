@@ -13,8 +13,12 @@ years = st.slider("Years Invested", 1, 50, 25)
 months = years * 12
 monthly_rate = rate / 100 / 12
 
+
+history = []
 balance = initial
 for i in range(months):
     balance = balance * (1 + monthly_rate) + monthly
-    
-st.write(f"${balance:,.2f}")
+    history.append(balance)
+
+st.metric("Ending Balance", f"${balance:,.2f}")
+st.line_chart(history)
