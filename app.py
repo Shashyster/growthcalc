@@ -3,7 +3,7 @@ import streamlit as st
 
 st.title("GrowthCalc")
 
-tab1, tab2, tab3= st.tabs(["Investment Calculator", "Retirement Checker", "Tax-Advantaged Comparision"])
+tab1, tab2, tab3, tab4= st.tabs(["Investment Calculator", "Retirement Checker", "Tax-Advantaged Comparision", "Loan Payoff"])
 
 with tab1:
     st.write("Calculate your investment growth over time.")
@@ -93,9 +93,42 @@ with tab3:
     col1, col2 = st.columns(2)
 
     with col1:
-        st.metric("Tax_Advantaged Balance", f"\\${adv_after_tax:,.2f}")
+        st.metric("Tax_Advantaged Balance", f"${adv_after_tax:,.2f}")
 
     with col2:
-        st.metric("Taxable Account Balance", f"\\${tax_balance:,.2f}" )
+        st.metric("Taxable Account Balance", f"${tax_balance:,.2f}" )
 
     st.line_chart({"Tax-Advantaged": adv_history, "Taxable": tax_history})
+
+
+
+with tab4:
+    st.write("Calculate your loan payoff time.")
+
+    loan_amount = st.slider("Loan Amount", 0, 1000000, 100000, key="loan_amount")
+    interest_rate = st.slider("Interest Rate (%)", 0.0, 10.0, 5.0, key="interest_rate")
+    term = st.slider("Term (years)", 1, 30, 15, key="term")
+
+    n = term * 12
+    monthly_rate = interest_rate / 100 / 12
+
+    monthly_payment = loan_amount * (monthly_rate * (1 + monthly_rate)**n) / ((1 + monthly_rate)**n - 1)
+
+    st.metric("Monthly Payment", f"${monthly_payment:,.2f}")
+
+
+    loan_balance = loan_amount
+    loan_history = []
+    interest_history = []
+
+    total_interest = 0
+    for i in range(n):
+        interest_payment = loan_balance * monthly_rate
+        principal_payment = monthly_payment - interest_payment
+        loan_balance = loan_balance - principal_payment
+        total_interest = total_interest + interest_payment
+        interest_history.append(total_interest)
+        loan_history.append(loan_balance)
+
+
+    st.line_chart({"Loan Balance": loan_history, "Total Interest": interest_history})
