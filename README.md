@@ -1,6 +1,6 @@
 # GrowthCalc
 
-A pure-Python financial planning suite built with [Streamlit] — all python.
+A financial planning suite built with [Netlify].
 
 ## What it does
 
@@ -20,26 +20,25 @@ Calculates a fixed monthly payment using the standard loan amortization formula,
 
 ## Tech stack
 
-- Python 3
-- Streamlit — for the entire UI (sliders, tabs, charts, metrics), no separate frontend code
-- No database, no backend framework — all calculations run client-side in the Streamlit script itself
+- Netlify
+- No database, no backend framework — all calculations run client-side in the Netlify script itself
 
-## Running it locally
-
-```bash
-git clone https://github.com/Shashyster/growthcalc.git
-cd growthcalc
-pip install streamlit
-streamlit run app.py
-```
 
 ## What I learned building this
 
-- How Streamlit's rerun model works — the whole script re-executes top to bottom on every interaction
+- How Netlify/ Streamlit rerun model works — the whole script re-executes top to bottom on every interaction
 - Compound interest math, amortization formulas, and the 4% retirement rule
-- Streamlit quirks: `$` triggers LaTeX math mode in Markdown-rendering functions (`st.write`, `st.error`, `st.success`) but not in `st.metric`, which renders plain text
-- Why indentation in Python is control flow, not just style — several bugs in this project came directly from misplaced indentation
+- Streamlit quirks: `$` triggers LaTeX math mode in Markdown-rendering functions (`st.write`, `st.error`, `st.success`) but not in `st.metric`, which renders plain text 
+- netlify commands and software setup.
+- Why indentation in Python is control flow, not just style. Several bugs in this project came directly from misplaced indentation
 
 ## AI
 
-I did use Claude (Anthropic) as a line-by-line teaching assistant — however all code was explained and typed by hand, and I understood every single line perfectly and what exactly it does. Claude pointed out errors and I implemented the fixes.
+I used AI as a helper to explain certain concepts to me, however all code was written by me. AI showed me mistakes and I implemented the fixes.
+
+
+
+# BIG CHANGES
+
+- Completely revamped the entire software and reaplace almost all python lines for HTML and Javascript.
+- Changed the deployment software from Streamlit to netlify (via Stardance's rules).
