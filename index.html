@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>GrowthCalc</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0A0F1C; --panel:#121826; --border:#1E2636;
+    --text:#E8EAED; --muted:#7C8598;
+    --gold:#E8C468; --gold-dim:#8A7038;
+    --teal:#35C9C1; --warn:#E0524A;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased}
+  body{min-height:100vh;padding:0 20px 80px}
+  .wrap{max-width:880px;margin:0 auto}
+  header.top{display:flex;justify-content:space-between;align-items:baseline;padding:32px 0 8px}
+  .eyebrow{font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.1em;color:var(--gold-dim);text-transform:uppercase}
+  .eyebrow strong{color:var(--gold);font-weight:500}
+  h1.title{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(28px,5vw,42px);margin:18px 0 6px}
+  p.sub{color:var(--muted);font-size:15px;max-width:520px;margin:0 0 28px;line-height:1.5}
+  .tabs{display:flex;gap:6px;border-bottom:1px solid var(--border);margin-bottom:28px;flex-wrap:wrap}
+  .tab-btn{font-family:'Inter',sans-serif;font-size:14px;font-weight:500;background:none;border:none;color:var(--muted);
+    padding:12px 6px;margin-right:22px;cursor:pointer;border-bottom:2px solid transparent;transition:.15s}
+  .tab-btn.active{color:var(--gold);border-bottom-color:var(--gold)}
+  .tab-panel{display:none}
+  .tab-panel.active{display:block}
+  .desc{color:var(--muted);font-size:14px;margin:0 0 24px}
+  .field{margin-bottom:22px}
+  .field label{display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--muted);margin-bottom:8px}
+  .field label .val{color:var(--gold)}
+  input[type=range]{-webkit-appearance:none;width:100%;height:4px;border-radius:2px;background:var(--border);outline:none}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--gold);
+    cursor:pointer;border:2px solid var(--bg);box-shadow:0 0 0 1px var(--gold-dim)}
+  input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--gold);cursor:pointer;border:2px solid var(--bg)}
+  .metrics{display:flex;gap:36px;flex-wrap:wrap;margin:28px 0 8px}
+  .metric .m-label{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+  .metric .m-val{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(28px,4vw,38px);color:var(--gold);font-variant-numeric:tabular-nums}
+  .metric.teal .m-val{color:var(--teal)}
+  svg.chart{width:100%;height:220px;display:block;margin-top:10px;overflow:visible}
+  .verdict{display:flex;gap:10px;align-items:center;padding:16px 18px;border-radius:10px;margin-top:20px;
+    font-family:'IBM Plex Mono',monospace;font-size:13px}
+  .verdict.ok{background:rgba(53,201,193,.08);border:1px solid rgba(53,201,193,.3);color:var(--teal)}
+  .verdict.short{background:rgba(224,82,74,.08);border:1px solid rgba(224,82,74,.3);color:var(--warn)}
+  .dot{width:8px;height:8px;border-radius:50%;background:currentColor;flex-shrink:0}
+  .legend{display:flex;gap:18px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--muted);margin-top:10px}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .swatch{width:10px;height:10px;border-radius:2px}
+  footer{margin-top:44px;padding-top:18px;border-top:1px solid var(--border);font-family:'IBM Plex Mono',monospace;
+    font-size:11px;color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+  footer a{color:var(--gold)}
+  @media(max-width:560px){.metrics{gap:22px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="eyebrow"><strong>GrowthCalc</strong> / financial planning suite</div>
+  </header>
+  <h1 class="title">GrowthCalc</h1>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="t1">Investment Calculator</button>
+    <button class="tab-btn" data-tab="t2">Retirement Checker</button>
+    <button class="tab-btn" data-tab="t3">Tax-Advantaged Comparison</button>
+    <button class="tab-btn" data-tab="t4">Loan Payoff</button>
+  </div>
+
+  <div class="tab-panel active" id="t1">
+    <p class="desc">Calculate your investment growth over time.</p>
+    <div class="field"><label>Starting Amount <span class="val" id="l1_initial">$5,000</span></label>
+      <input type="range" id="i1_initial" min="0" max="200000" step="500" value="5000"></div>
+    <div class="field"><label>Monthly Contribution <span class="val" id="l1_monthly">$300</span></label>
+      <input type="range" id="i1_monthly" min="0" max="5000" step="50" value="300"></div>
+    <div class="field"><label>Annual Return (%) <span class="val" id="l1_rate">7.0%</span></label>
+      <input type="range" id="i1_rate" min="0" max="15" step="0.5" value="7"></div>
+    <div class="field"><label>Years Invested <span class="val" id="l1_years">25</span></label>
+      <input type="range" id="i1_years" min="1" max="50" step="1" value="25"></div>
+
+    <div class="metrics">
+      <div class="metric"><div class="m-label">Ending Balance</div><div class="m-val" id="m1_balance">$0</div></div>
+    </div>
+    <svg class="chart" id="chart1" viewBox="0 0 800 220" preserveAspectRatio="none">
+      <defs><linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#E8C468" stop-opacity="0.45"/><stop offset="100%" stop-color="#E8C468" stop-opacity="0"/>
+      </linearGradient></defs>
+      <path id="c1fill" fill="url(#g1)" stroke="none"></path>
+      <path id="c1line" fill="none" stroke="#E8C468" stroke-width="2.5"></path>
+    </svg>
+  </div>
+
+  <div class="tab-panel" id="t2">
+    <p class="desc">Calculate your retirement savings and income over time.</p>
+    <div class="field"><label>Initial Retirement Amount <span class="val" id="l2_initial">$5,000</span></label>
+      <input type="range" id="i2_initial" min="0" max="1000000" step="1000" value="5000"></div>
+    <div class="field"><label>Current Age <span class="val" id="l2_curage">30</span></label>
+      <input type="range" id="i2_curage" min="18" max="70" step="1" value="30"></div>
+    <div class="field"><label>Retirement Age <span class="val" id="l2_retage">65</span></label>
+      <input type="range" id="i2_retage" min="40" max="80" step="1" value="65"></div>
+    <div class="field"><label>Desired Annual Income <span class="val" id="l2_income">$100,000</span></label>
+      <input type="range" id="i2_income" min="10000" max="1000000" step="1000" value="100000"></div>
+    <div class="field"><label>Retirement Annual Return (%) <span class="val" id="l2_rate">7.0%</span></label>
+      <input type="range" id="i2_rate" min="0" max="15" step="0.5" value="7"></div>
+    <div class="field"><label>Retirement Monthly Contribution <span class="val" id="l2_monthly">$300</span></label>
+      <input type="range" id="i2_monthly" min="0" max="5000" step="50" value="300"></div>
+
+    <div class="metrics">
+      <div class="metric"><div class="m-label">Projected Balance at Retirement</div><div class="m-val" id="m2_balance">$0</div></div>
+    </div>
+    <div class="verdict" id="v2_verdict"></div>
+  </div>
+
+  <div class="tab-panel" id="t3">
+    <p class="desc">Compare growth in a taxable vs. tax-advantaged account.</p>
+    <div class="field"><label>Starting Amount <span class="val" id="l3_initial">$5,000</span></label>
+      <input type="range" id="i3_initial" min="0" max="200000" step="500" value="5000"></div>
+    <div class="field"><label>Monthly Contribution <span class="val" id="l3_monthly">$300</span></label>
+      <input type="range" id="i3_monthly" min="0" max="5000" step="50" value="300"></div>
+    <div class="field"><label>Annual Return (%) <span class="val" id="l3_rate">7.0%</span></label>
+      <input type="range" id="i3_rate" min="0" max="15" step="0.5" value="7"></div>
+    <div class="field"><label>Years Invested <span class="val" id="l3_years">25</span></label>
+      <input type="range" id="i3_years" min="1" max="50" step="1" value="25"></div>
+    <div class="field"><label>Tax Rate (%) <span class="val" id="l3_tax">20.0%</span></label>
+      <input type="range" id="i3_tax" min="0" max="100" step="1" value="20"></div>
+
+    <div class="metrics">
+      <div class="metric"><div class="m-label">Tax-Advantaged Balance</div><div class="m-val" id="m3_adv">$0</div></div>
+      <div class="metric teal"><div class="m-label">Taxable Account Balance</div><div class="m-val" id="m3_tax">$0</div></div>
+    </div>
+    <svg class="chart" id="chart3" viewBox="0 0 800 220" preserveAspectRatio="none">
+      <path id="c3adv" fill="none" stroke="#E8C468" stroke-width="2.5"></path>
+      <path id="c3tax" fill="none" stroke="#35C9C1" stroke-width="2.5"></path>
+    </svg>
+    <div class="legend">
+      <span><span class="swatch" style="background:#E8C468"></span>Tax-Advantaged</span>
+      <span><span class="swatch" style="background:#35C9C1"></span>Taxable</span>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="t4">
+    <p class="desc">Calculate your loan payoff time.</p>
+    <div class="field"><label>Loan Amount <span class="val" id="l4_amount">$100,000</span></label>
+      <input type="range" id="i4_amount" min="0" max="1000000" step="1000" value="100000"></div>
+    <div class="field"><label>Interest Rate (%) <span class="val" id="l4_rate">5.0%</span></label>
+      <input type="range" id="i4_rate" min="0" max="10" step="0.1" value="5"></div>
+    <div class="field"><label>Term (years) <span class="val" id="l4_term">15</span></label>
+      <input type="range" id="i4_term" min="1" max="30" step="1" value="15"></div>
+
+    <div class="metrics">
+      <div class="metric"><div class="m-label">Monthly Payment</div><div class="m-val" id="m4_payment">$0</div></div>
+    </div>
+    <svg class="chart" id="chart4" viewBox="0 0 800 220" preserveAspectRatio="none">
+      <path id="c4bal" fill="none" stroke="#E8C468" stroke-width="2.5"></path>
+      <path id="c4int" fill="none" stroke="#35C9C1" stroke-width="2.5"></path>
+    </svg>
+    <div class="legend">
+      <span><span class="swatch" style="background:#E8C468"></span>Loan Balance</span>
+      <span><span class="swatch" style="background:#35C9C1"></span>Total Interest</span>
+    </div>
+  </div>
+
+  <footer>
+    <span>built for Stardance &middot; shipped in public</span>
+    <span>assumes monthly compounding</span>
+  </footer>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const fmt = n => '$' + Math.round(n).toLocaleString('en-US');
+const fmtCompact = n => n >= 1e6 ? '$' + (n/1e6).toFixed(2) + 'M' : fmt(n);
+
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    $(btn.dataset.tab).classList.add('active');
+  });
+});
+
+function pathFrom(points, maxVal) {
+  const w = 800, h = 220, pad = 6;
+  const n = points.length - 1;
+  return points.map((v, i) => {
+    const x = (i / n) * w;
+    const y = h - pad - (v / maxVal) * (h - pad * 2);
+    return (i === 0 ? 'M' : 'L') + x.toFixed(1) + ',' + y.toFixed(1);
+  }).join(' ');
+}
+
+const t1 = ['initial','monthly','rate','years'].reduce((o,k)=>(o[k]=$('i1_'+k),o),{});
+function renderT1(){
+  const initial=+t1.initial.value, monthly=+t1.monthly.value, rate=+t1.rate.value, years=+t1.years.value;
+  $('l1_initial').textContent=fmt(initial);
+  $('l1_monthly').textContent=fmt(monthly);
+  $('l1_rate').textContent=rate.toFixed(1)+'%';
+  $('l1_years').textContent=years;
+
+  const months=years*12, mr=rate/100/12;
+  let balance=initial; const history=[];
+  for(let i=0;i<months;i++){ balance = balance*(1+mr)+monthly; history.push(balance); }
+  $('m1_balance').textContent=fmtCompact(balance);
+
+  const maxVal = Math.max(...history)*1.05 || 1;
+  const line = pathFrom(history, maxVal);
+  $('c1line').setAttribute('d', line);
+  $('c1fill').setAttribute('d', line + ' L800,220 L0,220 Z');
+}
+Object.values(t1).forEach(el=>el.addEventListener('input', renderT1));
+
+const t2 = ['initial','curage','retage','income','rate','monthly'].reduce((o,k)=>(o[k]=$('i2_'+k),o),{});
+function renderT2(){
+  const initial=+t2.initial.value, curage=+t2.curage.value, retage=+t2.retage.value,
+        income=+t2.income.value, rate=+t2.rate.value, monthly=+t2.monthly.value;
+  $('l2_initial').textContent=fmt(initial);
+  $('l2_curage').textContent=curage;
+  $('l2_retage').textContent=retage;
+  $('l2_income').textContent=fmt(income);
+  $('l2_rate').textContent=rate.toFixed(1)+'%';
+  $('l2_monthly').textContent=fmt(monthly);
+
+  const yearsToRetire = Math.max(retage-curage, 0);
+  const months = yearsToRetire*12, mr = rate/100/12;
+  let balance = initial;
+  for(let i=0;i<months;i++){ balance = balance*(1+mr)+monthly; }
+  $('m2_balance').textContent=fmtCompact(balance);
+
+  const needed = income/0.04;
+  const v = $('v2_verdict');
+  if(balance >= needed){
+    v.className='verdict ok';
+    v.innerHTML='<span class="dot"></span> On track! You need about '+fmtCompact(needed)+' to support '+fmt(income)+'/year, and you\'re projected to have more than that.';
+  } else {
+    const gap = needed - balance;
+    v.className='verdict short';
+    v.innerHTML='<span class="dot"></span> Short by '+fmtCompact(gap)+'. You\'d need about '+fmtCompact(needed)+' to support '+fmt(income)+'/year.';
+  }
+}
+Object.values(t2).forEach(el=>el.addEventListener('input', renderT2));
+
+const t3 = ['initial','monthly','rate','years','tax'].reduce((o,k)=>(o[k]=$('i3_'+k),o),{});
+function renderT3(){
+  const initial=+t3.initial.value, monthly=+t3.monthly.value, rate=+t3.rate.value,
+        years=+t3.years.value, taxRate=+t3.tax.value;
+  $('l3_initial').textContent=fmt(initial);
+  $('l3_monthly').textContent=fmt(monthly);
+  $('l3_rate').textContent=rate.toFixed(1)+'%';
+  $('l3_years').textContent=years;
+  $('l3_tax').textContent=taxRate.toFixed(1)+'%';
+
+  const months=years*12, mr=rate/100/12, taxDec=taxRate/100;
+
+  let advBalance=initial; const advHist=[];
+  for(let i=0;i<months;i++){ advBalance = advBalance*(1+mr)+monthly; advHist.push(advBalance); }
+  const advAfterTax = advBalance*(1-taxDec);
+
+  let taxBalance=initial; const taxHist=[];
+  for(let i=0;i<months;i++){
+    const growth = taxBalance*mr;
+    const afterTaxGrowth = growth*(1-taxDec);
+    taxBalance = taxBalance + afterTaxGrowth + monthly;
+    taxHist.push(taxBalance);
+  }
+
+  $('m3_adv').textContent=fmtCompact(advAfterTax);
+  $('m3_tax').textContent=fmtCompact(taxBalance);
+
+  const maxVal = Math.max(...advHist, ...taxHist)*1.05 || 1;
+  $('c3adv').setAttribute('d', pathFrom(advHist, maxVal));
+  $('c3tax').setAttribute('d', pathFrom(taxHist, maxVal));
+}
+Object.values(t3).forEach(el=>el.addEventListener('input', renderT3));
+
+const t4 = ['amount','rate','term'].reduce((o,k)=>(o[k]=$('i4_'+k),o),{});
+function renderT4(){
+  const amount=+t4.amount.value, rate=+t4.rate.value, term=+t4.term.value;
+  $('l4_amount').textContent=fmt(amount);
+  $('l4_rate').textContent=rate.toFixed(1)+'%';
+  $('l4_term').textContent=term;
+
+  const n=term*12, mr=rate/100/12;
+  const payment = mr === 0 ? amount/n : amount*(mr*Math.pow(1+mr,n))/(Math.pow(1+mr,n)-1);
+  $('m4_payment').textContent=fmt(payment);
+
+  let balance=amount, totalInterest=0;
+  const balHist=[], intHist=[];
+  for(let i=0;i<n;i++){
+    const interestPayment = balance*mr;
+    const principalPayment = payment - interestPayment;
+    balance = balance - principalPayment;
+    totalInterest += interestPayment;
+    balHist.push(Math.max(balance,0));
+    intHist.push(totalInterest);
+  }
+  const maxVal = Math.max(...balHist, ...intHist)*1.05 || 1;
+  $('c4bal').setAttribute('d', pathFrom(balHist, maxVal));
+  $('c4int').setAttribute('d', pathFrom(intHist, maxVal));
+}
+Object.values(t4).forEach(el=>el.addEventListener('input', renderT4));
+
+renderT1(); renderT2(); renderT3(); renderT4();
+</script>
+</body>
+</html>
